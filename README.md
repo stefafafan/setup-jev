@@ -56,7 +56,7 @@ jobs:
           instructions+='Use medium when focused human review is warranted but no concrete high-risk issue is apparent. '
           instructions+='Use low when no material merge risk is apparent from the diff.'
 
-          result=$(gh pr diff "$PR_NUMBER" | \
+          result=$(gh pr diff "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" | \
             jev --provider vercel choice \
               --option risk-low \
               --option risk-medium \
@@ -72,8 +72,10 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           RISK: ${{ steps.classify.outputs.risk }}
         run: |
-          gh pr edit "$PR_NUMBER" --remove-label 'jev: risk-low,jev: risk-medium,jev: risk-high'
-          gh pr edit "$PR_NUMBER" --add-label "jev: $RISK"
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" \
+            --remove-label 'jev: risk-low,jev: risk-medium,jev: risk-high'
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" \
+            --add-label "jev: $RISK"
 ```
 
 See the [Jev CLI documentation](https://github.com/stefafafan/jev) for Vercel and Cloudflare configuration and the available question primitives.
